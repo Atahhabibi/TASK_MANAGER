@@ -93,6 +93,7 @@ font-family: var(--bodyFont);
 font-weight: 400;
 line-height: 1.75;
 color:var(--textColor);
+background-color:grey;
 }
 
 p {
@@ -102,7 +103,6 @@ p {
 
 h1, h2, h3, h4, h5 {
 margin: 0;
-margin-bottom: 1.38rem;
 font-family: var(--headingFont);
 font-weight: 400;
 line-height: 1.3;
