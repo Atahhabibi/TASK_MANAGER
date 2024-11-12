@@ -1,16 +1,104 @@
 import styled from "styled-components";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  changeFlag,
+  changeInput,
+  checkedTask,
+  deleteTask,
+  updateTask
+} from "../features/task/taskSlice";
+import { customFetch } from "../util/customFetch";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-const singleTask = ({ id, completed, name }) => {
+export const editTask = async ({ id, task }) => {
+  const response = await customFetch.patch(`/tasks/${id}`, task);
+  return response.data;
+};
+
+const deleteItem = async (id) => {
+  const response = await customFetch.delete(`/tasks/${id}`);
+  return response.data;
+};
+
+const SingleTask = ({ id, completed, name }) => {
+  const dispatch = useDispatch();
+  const { tasksList } = useSelector((store) => store.task);
+
+  const queryClient = useQueryClient();
+
+ const updateMutate = useMutation({
+    mutationFn: editTask,
+    onSuccess: (data) => {
+      console.log("task updated", data);
+      queryClient.invalidateQueries(["tasks"]);
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
+  const deleteMutate = useMutation({
+    mutationFn: deleteItem,
+    onSuccess: (data) => {
+      console.log("task deleted", data);
+      dispatch(deleteTask({ id }));
+      queryClient.invalidateQueries(["tasks"]);
+    },
+    onError: (error) => {
+      console.log(error);
+    }
+  });
+
+  const handleTask = ({ e, id }) => {
+    const targetClass = e.target.textContent;
+
+    if (targetClass === "delete") {
+      deleteMutate.mutate(id);
+    }
+
+    if (targetClass === "edit") {
+      let task = tasksList.find((i) => i.id === id);
+      dispatch(changeFlag({status:true,id:task.id}));
+      const inputTask = document.body.querySelector(".taskInput");
+      inputTask.value = task.name;
+      inputTask.focus();
+      dispatch(changeInput(task.name));
+    }
+
+    if (e.target.classList.contains("checkbox")) {
+      dispatch(checkedTask({ id }));
+
+      let task = tasksList.find((i) => i.id === id);
+
+      task = { ...task, completed: !completed };
+
+      updateMutate.mutate({ id, task });
+    }
+  };
+
   return (
     <Wrapper>
       <div className="checkbox-container">
-        <input type="checkbox" className="checkbox" defaultChecked={completed} />
-        <h4 className="item-name">{name}</h4>
+        <input
+          type="checkbox"
+          className="checkbox"
+          onChange={(e) => handleTask({ e, id })}
+        />
+        <h4
+          className="item-name"
+          style={{ textDecoration: completed ? " line-through" : " " }}
+        >
+          {name}
+        </h4>
       </div>
 
       <div className="btn-container">
-        <button className="edit">edit</button>
-        <button className="delete">delete</button>
+        <button className="edit" onClick={(e) => handleTask({ e, id })}>
+          edit
+        </button>
+        <button className="delete" onClick={(e) => handleTask({ e, id })}>
+          delete
+        </button>
       </div>
     </Wrapper>
   );
@@ -68,4 +156,4 @@ const Wrapper = styled.article`
     }
   }
 `;
-export default singleTask;
+export default SingleTask;

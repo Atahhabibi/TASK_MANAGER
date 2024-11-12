@@ -1,11 +1,17 @@
+function generateRandomId(length = 8) {
+  return Math.random().toString(36).substr(2, length);
+}
+
 const tasks = [
-    { id: 1, name: 'egg', completed: false },
-    { id: 2, name: 'milk', completed: false },
-    { id: 3, name: 'bread', completed: false },
-    { id: 4, name: 'butter', completed: false },
-    { id: 5, name: 'cheese', completed: false }
+  { id: generateRandomId(), name: "egg", completed: false },
+  { id: generateRandomId(), name: "milk", completed: false },
+  { id: generateRandomId(), name: "bread", completed: false },
+  { id: generateRandomId(), name: "butter", completed: false },
+  { id: generateRandomId(), name: "cheese", completed: false }
 ];
 
+function generateRandomId(length = 8) {
+  return Math.random().toString(36).substr(2, length);
+}
 
-
-module.exports={tasks}
+module.exports = { tasks };

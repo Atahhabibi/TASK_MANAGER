@@ -2,18 +2,30 @@ import styled from "styled-components";
 import { customFetch } from "../util/customFetch";
 import { Form, ListsContainer } from "../components";
 import { useQuery } from "@tanstack/react-query";
+import { useDispatch } from "react-redux";
+import { updateTask } from "../features/task/taskSlice";
+import { useEffect } from "react";
 
 const fetchTasks = async () => {
   const response = await customFetch("/tasks");
-  console.log(response.data);
   return response.data;
 };
 
 const Home = () => {
+  const dispatch = useDispatch();
+
   const { data, isLoading, error } = useQuery({
     queryKey: ["tasks"],
-    queryFn: fetchTasks,
+    queryFn: fetchTasks
   });
+
+  // Use useEffect to dispatch the updateTask action only when data is available
+  
+  useEffect(() => {
+    if (data?.data) {
+      dispatch(updateTask(data.data));
+    }
+  }, [data, dispatch]);
 
   if (isLoading) return <div>Loading...</div>;
   if (error) return <div>Error: {error.message}</div>;
@@ -22,10 +34,8 @@ const Home = () => {
     <Wrapper>
       <div className="section-center">
         <div className="section-title">
-          <h1>Task manager</h1>
+          <h1>Task Manager</h1>
         </div>
-
-        <div className="div"></div>
 
         <Form />
         <ListsContainer tasks={data?.data} />
